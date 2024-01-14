@@ -1,0 +1,30 @@
+ara	CA01	Diari Ara
+elperiodicocat	CA02	El Periodico de Catalunya
+diarigirona	CA03	Diari de Girona
+regio7	CA04	Regió 7
+naciodigital	CA05	Nació Digital
+diarilaveu	CA06	Diari La Veu
+elpuntavui	CA07	El Punt Avui
+eltemps	CA08	El Temps
+vilaweb	CA09	VilaWeb
+elpais	ES01	El País
+lasprovincias	ES02	Las Provincias
+diariodemallorca	ES03	Diario de Mallorca
+abc	ES04	ABC
+elespanol	ES05	El Español
+eldiario	ES06	El Diario
+publico	ES07	Público
+lavanguardia	ES08	La Vanguardia
+levante	ES09	Levante
+elperiodicoes	ES10	El Periódico de Catalunya
+20minutos	ES11	20 Minutos
+elperdearagon	ES12	El Periódico de Aragón
+larazon	ES13	La Razón
+elmundo	ES14	El Mundo
+efe	ES15	Agencia EFE
+elindependiente	ES16	El Independiente
+nodo50	ES17	Nodo 50
+eleconomista	ES18	El Economísta
+europapress	ES19	Europa Press
+ultimahora	ES20	Última Hora
+expansion	ES21	Expansión
