@@ -14,7 +14,7 @@ import nltk
 from tqdm import tqdm
 from sys import stdout
 import os
-from diffusers import StableDiffusionPipeline
+from safetensors import safe_open
 
 tokens_llengua_a_id = {
     "<lang:ca>": 60002,
@@ -27,7 +27,7 @@ id_a_tokens_llengua = {
 
 def main(checkpoint= "NAS-bilingue", carpeta = "./resums_generats_bilingue", carregar_de_hugginface = False, carregar_de_cache = True, llengua = "ca"):
     nltk.download('punkt')
-    #carregar_de_cache = True
+    carregar_de_cache = True
     #SI CANVIEM LA LLENGUA CANVIAR ELS TOKENS FONTS QUE FALTEN ELS DE CASTELLÀ
     # llengua = "ca"
     #carregar_de_hugginface = True
@@ -40,8 +40,17 @@ def main(checkpoint= "NAS-bilingue", carpeta = "./resums_generats_bilingue", car
     # Token de serparació entre les fonts i el text
     SEP_TOKEN = "<text>"
     tokenizer = AutoTokenizer.from_pretrained(checkpoint, local_files_only = not carregar_de_hugginface, use_fast=True)
-    # model = AutoModelForSeq2SeqLM.from_pretrained(checkpoint, use_safetensors=True)
-    model = StableDiffusionPipeline.from_single_file(checkpoint, use_safetensors=True)
+    model = AutoModelForSeq2SeqLM.from_pretrained(checkpoint)
+    # model = DiffusionPipeline.from_pretrained(checkpoint, use_safetensors=True)
+
+
+    # model_path = checkpoint + "/model.safetensors"
+    # model_tensors = {}
+    # with safe_open(model_path, framework="pt", device=0) as f:
+    #     for k in f.keys():
+    #         model_tensors[k] = f.get_tensor(k)
+    # model = AutoModelForSeq2SeqLM.from_dict(model_tensors)
+
 
     # Els nous tokens especials seran tant el SEP_TOKEN com les claus de les
     # fonts per a l'idioma en concret, pero en principi ja estan en el tokenizer que hem descarregat
@@ -192,7 +201,6 @@ def main(checkpoint= "NAS-bilingue", carpeta = "./resums_generats_bilingue", car
                         clean_up_tokenization_spaces=False
                     ) for g in summary_ids
                 ])
-        
                 predictions = ["\n".join(nltk.sent_tokenize(pred.strip(), language="spanish")) for pred in predictions]
                 #for pred, id, source in zip(predictions, batch_original["id"], batch_original["source"]):
                 for i, pred in enumerate(predictions):
@@ -201,7 +209,7 @@ def main(checkpoint= "NAS-bilingue", carpeta = "./resums_generats_bilingue", car
                     id = batch_original["id"][i]
                     source = batch_original["source"][i]
                     lang = batch_original["lang"][i]
-                    pred_lang = summary_ids[i].tolist()[3]
+                    # pred_lang = summary_ids[i].tolist()[3]
                     if lang not in json_data:
                         json_data[lang] = dict()
                     if id not in json_data[lang]:
@@ -210,7 +218,8 @@ def main(checkpoint= "NAS-bilingue", carpeta = "./resums_generats_bilingue", car
                             "lang": lang.upper(),
                         }
                     json_data[lang][id][f"summary_{token_lang.lower()}"] = pred
-                    json_data[lang][id][f"pred_idioma_article_{token_lang.lower()}"] = id_a_tokens_llengua[pred_lang]
+                    #ME SEMBLA QUE NO PREDIU LA LLENGUA DE L'ARTICLE, SINO LA DEL RESUM
+                    # json_data[lang][id][f"pred_idioma_article_{token_lang.lower()}"] = id_a_tokens_llengua[pred_lang]
         
             #escrivim el resultat en un fitxer
             for llengua in json_data.keys():
@@ -228,7 +237,7 @@ def main(checkpoint= "NAS-bilingue", carpeta = "./resums_generats_bilingue", car
     # generate_summaries(model, tokenized_test_ni, test_ni, ruta = f"{carpeta}/resums_llargs/resums_test_ni_original", subset = "test_ni", min_length = 70, max_length = 420)
 
 if __name__ == "__main__":
-    checkpoint = "checkpoint-119328/model.safetensors"
+    checkpoint = "checkpoint-119328"
     nom_carpeta = "resums_generats_bilingue"
     if not os.path.exists(nom_carpeta):
         os.makedirs(nom_carpeta)

@@ -27,8 +27,8 @@ def main(checkpoint= "NAS-bilingue", carregar_de_hugginface = False, carregar_de
     # Token de serparació entre les fonts i el text
     SEP_TOKEN = "<text>"
     tokenizer = AutoTokenizer.from_pretrained(checkpoint, local_files_only = not carregar_de_hugginface, use_fast=True, use_safetensors=True)
-    # model = AutoModelForSeq2SeqLM.from_pretrained(checkpoint, use_safetensors=True)
-    model = StableDiffusionPipeline.from_single_file(checkpoint, use_safetensors=True)
+    model = AutoModelForSeq2SeqLM.from_pretrained(checkpoint)
+    # model = StableDiffusionPipeline.from_single_file(checkpoint, use_safetensors=True)
 
 
     # Els nous tokens especials seran tant el SEP_TOKEN com les claus de les
@@ -141,5 +141,5 @@ def main(checkpoint= "NAS-bilingue", carregar_de_hugginface = False, carregar_de
         json.dump(res_ni, f)
 
 if __name__ == "__main__":
-    checkpoint = "checkpoint-119328/model.safetensors"
+    checkpoint = "checkpoint-119328"
     main(checkpoint = checkpoint)
