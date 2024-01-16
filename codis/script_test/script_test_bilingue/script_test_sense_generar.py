@@ -13,6 +13,7 @@ from tqdm import tqdm
 from sys import stdout
 from sklearn.metrics import precision_recall_fscore_support, accuracy_score, recall_score, confusion_matrix
 import json
+from diffusers import StableDiffusionPipeline
 
 def main(checkpoint= "NAS-bilingue", carregar_de_hugginface = False, carregar_de_cache = True, llengua = "ca"):
     nltk.download('punkt')
@@ -25,8 +26,10 @@ def main(checkpoint= "NAS-bilingue", carregar_de_hugginface = False, carregar_de
 
     # Token de serparació entre les fonts i el text
     SEP_TOKEN = "<text>"
-    tokenizer = AutoTokenizer.from_pretrained(checkpoint, local_files_only = not carregar_de_hugginface, use_fast=True)
-    model = AutoModelForSeq2SeqLM.from_pretrained(checkpoint)
+    tokenizer = AutoTokenizer.from_pretrained(checkpoint, local_files_only = not carregar_de_hugginface, use_fast=True, use_safetensors=True)
+    # model = AutoModelForSeq2SeqLM.from_pretrained(checkpoint, use_safetensors=True)
+    model = StableDiffusionPipeline.from_single_file(checkpoint, use_safetensors=True)
+
 
     # Els nous tokens especials seran tant el SEP_TOKEN com les claus de les
     # fonts per a l'idioma en concret, pero en principi ja estan en el tokenizer que hem descarregat
@@ -138,4 +141,5 @@ def main(checkpoint= "NAS-bilingue", carregar_de_hugginface = False, carregar_de
         json.dump(res_ni, f)
 
 if __name__ == "__main__":
-    main()
+    checkpoint = "checkpoint-119328/model.safetensors"
+    main(checkpoint = checkpoint)

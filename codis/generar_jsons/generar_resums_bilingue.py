@@ -14,14 +14,15 @@ import nltk
 from tqdm import tqdm
 from sys import stdout
 import os
+from diffusers import StableDiffusionPipeline
 
 tokens_llengua_a_id = {
-    "CA": 9559,
-    "ES": 1633
+    "<lang:ca>": 60002,
+    "<lang:es>": 60003
 }
 id_a_tokens_llengua = {
-    9559: "CA",
-    1633: "ES"
+    60002: "<lang:ca>",
+    60003: "<lang:es>"
 }
 
 def main(checkpoint= "NAS-bilingue", carpeta = "./resums_generats_bilingue", carregar_de_hugginface = False, carregar_de_cache = True, llengua = "ca"):
@@ -39,7 +40,8 @@ def main(checkpoint= "NAS-bilingue", carpeta = "./resums_generats_bilingue", car
     # Token de serparació entre les fonts i el text
     SEP_TOKEN = "<text>"
     tokenizer = AutoTokenizer.from_pretrained(checkpoint, local_files_only = not carregar_de_hugginface, use_fast=True)
-    model = AutoModelForSeq2SeqLM.from_pretrained(checkpoint)
+    # model = AutoModelForSeq2SeqLM.from_pretrained(checkpoint, use_safetensors=True)
+    model = StableDiffusionPipeline.from_single_file(checkpoint, use_safetensors=True)
 
     # Els nous tokens especials seran tant el SEP_TOKEN com les claus de les
     # fonts per a l'idioma en concret, pero en principi ja estan en el tokenizer que hem descarregat
@@ -170,7 +172,7 @@ def main(checkpoint= "NAS-bilingue", carpeta = "./resums_generats_bilingue", car
             "ca": dict(),
             "es": dict(),
         }
-        for token_lang in ["CA", "ES"]:
+        for token_lang in ["<lang:ca>", "<lang:es>"]:
             forced_token = tokens_llengua_a_id[token_lang]
             for batch, batch_original in zip(tqdm(DataLoader(test_dataset, collate_fn = data_collator, batch_size=8, shuffle=False), desc="Generant resums"), DataLoader(test_original, batch_size=8, shuffle=False)):
                 batch = {k: v.to(device
@@ -209,7 +211,7 @@ def main(checkpoint= "NAS-bilingue", carpeta = "./resums_generats_bilingue", car
                         }
                     json_data[lang][id][f"summary_{token_lang.lower()}"] = pred
                     json_data[lang][id][f"pred_idioma_article_{token_lang.lower()}"] = id_a_tokens_llengua[pred_lang]
-                break
+        
             #escrivim el resultat en un fitxer
             for llengua in json_data.keys():
                 with open(f"{ruta}_{llengua}.json" , "w") as f:
@@ -226,8 +228,9 @@ def main(checkpoint= "NAS-bilingue", carpeta = "./resums_generats_bilingue", car
     # generate_summaries(model, tokenized_test_ni, test_ni, ruta = f"{carpeta}/resums_llargs/resums_test_ni_original", subset = "test_ni", min_length = 70, max_length = 420)
 
 if __name__ == "__main__":
+    checkpoint = "checkpoint-119328/model.safetensors"
     nom_carpeta = "resums_generats_bilingue"
     if not os.path.exists(nom_carpeta):
         os.makedirs(nom_carpeta)
 
-    main(carpeta = f"./{nom_carpeta}")
+    main(checkpoint=checkpoint,carpeta = f"./{nom_carpeta}")
