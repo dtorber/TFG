@@ -20,14 +20,19 @@ tokenizers={
     "ca": pyonmttok.Tokenizer(mode="none", sp_model_path = "../models_softcatala/ca-es/tokenizer/sp_m.model"),
 }
 
+cuda_device = "cuda" if torch.cuda.is_available() else "cpu"
 
 def translate_text (text, from_lang, to_lang):
     text_tokenized = list()
+    longitud_maxima = 0
     for t in text:
-        text_tokenized.append(tokenizers[from_lang].tokenize(t)[0])
+        tokenized = tokenizers[from_lang].tokenize(t)[0]
+        longitud_maxima = max(longitud_maxima, len(tokenized))
+        text_tokenized.append(tokenized)
 
-    translator = ctranslate2.Translator(f"../models_softcatala/{from_lang}-{to_lang}/ctranslate2")
-    translated = translator.translate_batch(text_tokenized)
+
+    translator = ctranslate2.Translator(f"../models_softcatala/{from_lang}-{to_lang}/ctranslate2", device = cuda_device, max_queued_batches = -1)
+    translated = translator.translate_batch(text_tokenized, max_decoding_length = int(1.1 * longitud_maxima), max_batch_size=32)
     translated = [tokenizers[from_lang].detokenize(t[0]["tokens"]) for t in translated]
 
     return translated
