@@ -94,8 +94,8 @@ def main(checkpoint= "NAS-bilingue", carregar_de_hugginface = False, carregar_de
             for k, _ in resums_json[llengua].items():
                 resums_json[llengua][k]["id"] = k
             for batch in tqdm(DataLoader(list(resums_json[llengua].values()), batch_size=8, shuffle=False), desc="Avaluant el model"):
-                predictions_ca = batch["summary_ca"]
-                predictions_es = batch["summary_es"]
+                predictions_ca = batch["summary_<lang:ca>"]
+                predictions_es = batch["summary_<lang:es>"]
                 referencies_ca = list()
                 referencies_es = list()
                 for id in batch["id"]:
@@ -119,13 +119,13 @@ def main(checkpoint= "NAS-bilingue", carregar_de_hugginface = False, carregar_de
                 print(f"{key} has an empty value")
         #si volem fer servir este script per a NASes haurem de canviar el lang
 
-        resultats_bert = dict()
-        for key, val in metriques_bert.items():
-            try:
-                llengua = key.split("-")[1]
-                resultats_bert[key] = np.mean(np.array(val.compute(lang = llengua)))
-            except:
-                print(f"{key} has an empty value")
+        # resultats_bert = dict()
+        # for key, val in metriques_bert.items():
+        #     try:
+        #         llengua = key.split("-")[1]
+        #         resultats_bert[key] = np.mean(np.array(val.compute(lang = llengua)))
+        #     except:
+        #         print(f"{key} has an empty value")
 
         return {
             "rouge": resultats_rouge,

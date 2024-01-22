@@ -9,6 +9,7 @@ import gzip
 import json
 import evaluate
 import sys
+import os
 
 PATH_CORPUS = "../corpus_proves_traduccio/prova_traduccio_boso"
 if len(sys.argv) > 1:
@@ -18,6 +19,9 @@ particions = ["train", "validation", "test-i", "test-ni"]
 metrica = dict()
 resultats = dict()
 for particio in particions:
+    if not os.path.exists(f"{PATH_CORPUS}/{particio}.json.gz"):
+        continue
+    print("Avaluant partició", particio)
     metrica[particio] = {
         "ca": evaluate.load("bleu"),
         "es": evaluate.load("bleu")
@@ -25,21 +29,22 @@ for particio in particions:
     resultats[particio] = dict()
     with gzip.open(f"{PATH_CORPUS}/{particio}.json.gz", "r") as f:
         corpus = json.load(f)
-        print(corpus)
-        input()
+        prediccions = list()
+        referencies = list()
         for i in range(len(corpus)):
-            print(corpus[i])
-            input()
             lang = corpus[i]["lang"]
-            metrica[particio][lang].add_batch(predictions = corpus[i][f"summary_pred_{lang}"], references = corpus[i][f"summary_ref_{lang}"])
+            metrica[particio][lang].add_batch(predictions = [corpus[i][f"summary_pred_{lang}"]], references = [corpus[i][f"summary_ref_{lang}"]])
 
     for lang in ["ca", "es"]:
         resultats[particio][lang] = metrica[particio][lang].compute()
 
 print(metrica)
 print(resultats)
-with open("resultats_bilingue/bleu/metrica_bleu.json", "w") as f:
-    json.dump(metrica, f)
 
-with open("resultats_bilingue/bleu/resultats_bleu.json", "w") as f:
+model_traduccio = "boso" if "boso" in PATH_CORPUS else "softcatala"
+
+# with open(f"resultats_bilingue/bleu/metrica_bleu_{model_traduccio}.json", "w") as f:
+#     json.dump(metrica, f)
+
+with open(f"resultats_bilingue/bleu/resultats_bleu_{model_traduccio}.json", "w") as f:
     json.dump(resultats, f)

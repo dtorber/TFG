@@ -54,31 +54,31 @@ equivalencia = {
 }
 
 #carreguem els datasets en català
-# validacio_ca = datasets.load_dataset("json", data_files="../corpus_anonimitzat/ca/validation.json.gz")
-# entrenament_ca = datasets.load_dataset("json", data_files="../corpus_anonimitzat/ca/train.json.gz")
+validacio_ca = datasets.load_dataset("json", data_files="../corpus_anonimitzat/ca/validation.json.gz")
+entrenament_ca = datasets.load_dataset("json", data_files="../corpus_anonimitzat/ca/train.json.gz")
 test_i_ca = datasets.load_dataset("json", data_files="../corpus_anonimitzat/ca/test-i.json.gz")
 test_ni_ca = datasets.load_dataset("json", data_files="../corpus_anonimitzat/ca/test-ni.json.gz")
 
 #com s'agafa tot el corpus de català directament ho col·loquem tot i anirem afegim els exemples de espanyol
 corpus_ca = {
-    # "train": entrenament_ca["train"],
-    # "validation": validacio_ca["train"],
     "test-i": test_i_ca["train"],
-    "test-ni": test_ni_ca["train"]
+    "test-ni": test_ni_ca["train"],
+    "train": entrenament_ca["train"],
+    "validation": validacio_ca["train"],
 }
 
 conteig_ca = {
-    # "train": dict(),
-    # "validation": dict(),
     "test-i": dict(),
     "test-ni": dict(),
+    "train": dict(),
+    "validation": dict(),
 }
 
 corpus_ca_es = {
-    # "train": [],
-    # "validation": [],
     "test-i": [],
-    "test-ni": []
+    "test-ni": [],
+    "train": [],
+    "validation": [],
 }
 
 #afegim el camp lang a tots els exemples de català i marquem el summary com a summary en català
@@ -94,38 +94,38 @@ for particio in corpus_ca.keys():
 
         conteig_ca[particio][corpus_ca[particio][i]["source"]] = conteig_ca[particio].get(corpus_ca[particio][i]["source"], 0) + 1
         resums_catala.append(entrada["summary_ref_ca"])
-    print("Traduint resums català a espanyol...")
+    print(f"Traduint resums català a espanyol ({particio})...")
     traduccions_catala = translate_text(resums_catala, "ca", "es")
-    print("Traduint de volta resums espanyol a català...")
+    print(f"Traduint de volta resums espanyol a català ({particio})...")
     traduccions_predites = translate_text(traduccions_catala, "es", "ca")
     for i in range(len(corpus_ca_es[particio])):
         corpus_ca_es[particio][i]["summary_aux_es"] = traduccions_catala[i]
         corpus_ca_es[particio][i]["summary_pred_ca"] = traduccions_predites[i]
 
 #carreguem els datasets en espanyol
-# validacio_es = datasets.load_dataset("json", data_files="../corpus_anonimitzat/es/validation.json.gz")
-# entrenament_es = datasets.load_dataset("json", data_files="../corpus_anonimitzat/es/train.json.gz")
 test_i_es = datasets.load_dataset("json", data_files="../corpus_anonimitzat/es/test-i.json.gz")
 test_ni_es = datasets.load_dataset("json", data_files="../corpus_anonimitzat/es/test-ni.json.gz")
+validacio_es = datasets.load_dataset("json", data_files="../corpus_anonimitzat/es/validation.json.gz")
+entrenament_es = datasets.load_dataset("json", data_files="../corpus_anonimitzat/es/train.json.gz")
 
 corpus_es_aux = {
-    # "train": entrenament_es["train"].shuffle(seed=42),
-    # "validation": validacio_es["train"].shuffle(seed=42),
     "test-i": test_i_es["train"].shuffle(seed=42),
-    "test-ni": test_ni_es["train"].shuffle(seed=42)
+    "test-ni": test_ni_es["train"].shuffle(seed=42),
+    "train": entrenament_es["train"].shuffle(seed=42),
+    "validation": validacio_es["train"].shuffle(seed=42),
 }
 
 conteig_es = {
-    # "train": dict(),
-    # "validation": dict(),
     "test-i": dict(),
     "test-ni": dict(),
+    "train": dict(),
+    "validation": dict(),
 }
 corpus_es = {
-    # "train": [],
-    # "validation": [],
-    "test-i": [],
-    "test-ni": [],
+    "test-i": list(),
+    "test-ni": list(),
+    "train": list(),
+    "validation": list(),
 }
 
 for particio in corpus_es_aux.keys():
@@ -144,9 +144,9 @@ for particio in corpus_es_aux.keys():
 
             conteig_es[particio][source] = conteig_es[particio].get(source, 0) + 1 
             resums_espanyol.append(summary)
-    print("Traduint resums espanyol a català...")
+    print(f"Traduint resums espanyol a català ({particio})...")
     traduccions_espanyol = translate_text(resums_espanyol, "es", "ca")
-    print("Traduint de volta resums català a espanyol...")
+    print(f"Traduint de volta resums català a espanyol ({particio})...")
     traduccions_predites = translate_text(traduccions_espanyol, "ca", "es")
     for i in range(len(corpus_es[particio])):
         corpus_es[particio][i]["summary_aux_ca"] = traduccions_espanyol[i]
