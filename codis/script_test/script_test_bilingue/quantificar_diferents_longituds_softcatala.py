@@ -1,8 +1,7 @@
 """
-    Aquest script pretèn rebre uns resums ja traduits del castellà al català i del català al castellà, i l'objectiu és desfer la traducció (tornant a traduir)
-    per tant ja tindriem el resum en l'idioma original, i l'anem a comparar amb l'original mitjançant BLEU per veure si els models traductors que fiquem pel mig
-    estigueren afectant molt a la qualitat del resum amb que hem entrenat
-    ESTA ES LA PART DE L'SCRIPT QUE COMPARA AMBDÓS JSONS
+    Aquest script pretèn comparar els resums generats després de les 2 voltes i els de referència per veure si s'ha
+    deixat per traduir de resums de la forma X1.X2 el X2, perquè s'ha observat que hi ha casos en què es deixa
+    sense traduir la segona frase una vegada troba el punt.
 """
 
 import gzip
